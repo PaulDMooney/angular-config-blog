@@ -49,11 +49,25 @@ module.exports = PROXY_CONFIG;
 The environment variable can be passed via commandline `API_SERVER=http://myinternalhost:8080 npm start`
 
 ### Reverse Proxy when Deployed
----Docker container with nginx config
+When you're deploying your application, you won't have webpack's dev-server to use as a reverse proxy so you'll need a separate standalone one. Popular options for reverse proxies are webservers like [NGINX](https://www.nginx.com/) or [Apache HTTP Server](https://httpd.apache.org/). These serve other purposes as well such as handling HTTPS, load balancing, or if you're not using Server Side Rendering (https://angular.io/guide/universal) they can be used to host your Angular app's static assets. So it's likely you'll need one of these anyways.
+
+The key idea here is that the reverse proxy is the single point for traffic to and from the browser for both requests to your app, and requests to the API server.
+
+TODO: Possible image here?
+
+Here's a snippet of nginx configuration that forwards traffic to your app, and to our `http://myinternalhost:8080` API server:
+
+TODO: Example configuration
 
 ### What about Server Side Rendering?
+In server side rendering, your code is running on the server similar to how it would run in the browser, complete with the API calls it needs to make but with a few exceptions. One of those exceptions is that relative URLs are meaningless on the server, so it turns out that our app does need the absolute URL for our backend API server afterall.
+
+Luckily, when rendering on the server, we're not in a context where we need to worry about CORS, and we are in a context where your code can read environment variables. So our example HttpClient request can be altered to look like this:
+
+TODO: Updated example HttpClient call
 
 ### Another exception to the rule...
+TODO: Was going to do this thing on HTTPInterceptor for transferstate... but it's a really convoluted case that can be solved in other ways.
 
 ## Environment Variables vs Environment.ts
 
