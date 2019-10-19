@@ -6,3 +6,5 @@ const PROXY_CONFIG = {
     'changeOrigin': true
   }
 };
+
+module.exports = PROXY_CONFIG;
