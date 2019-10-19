@@ -31,6 +31,12 @@ app.engine('html', ngExpressEngine({
 app.set('view engine', 'html');
 app.set('views', DIST_FOLDER);
 
+app.get('/configapi', (req, res) => {
+  res.status(200).send({
+    DEBOUNCE_TIME: process.env.DEBOUNCE_TIME || 500 // Read from environment or default to 500
+  });
+});
+
 // Example Express Rest API endpoints
 // app.get('/api/**', (req, res) => { });
 // Serve static files from /browser
