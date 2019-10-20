@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const PROXY_CONFIG = {
   '/config': {
     'bypass': function (req, res, proxyOptions) {
@@ -12,7 +14,7 @@ const PROXY_CONFIG = {
         }
     }
   },
-  'api': {
+  '/api': {
     'target': process.env.API_SERVER,
     'secure': false,
     'logLevel': 'debug',

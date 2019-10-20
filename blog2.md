@@ -31,6 +31,12 @@ const PROXY_CONFIG = {
 module.exports = PROXY_CONFIG;
 ```
 
+And alter the "start" npm script to tell it to use the `proxy.conf.js` file:
+
+```json
+"start":"ng serve --proxy-config proxy.conf.js"
+```
+
 Of course it would be better if the `target` value was not hardcoded to a specific server in a file that we're going to be checking into version control, so we can use an environment variable instead. Let's make the above snippet better:
 
 ```javascript
