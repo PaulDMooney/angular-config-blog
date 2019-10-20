@@ -78,22 +78,24 @@ When you're deploying your application, you won't have webpack's dev-server to u
 
 The key idea here is that the reverse proxy is the single point for traffic to and from the browser for both requests to your app, and requests to the API server.
 
-TODO: Possible image here?
+![Reverse Proxy Layout](./figures/reverse_proxy_diagram.png)
 
 Here's a snippet of nginx configuration that forwards traffic to your app, and to our `http://myinternalhost:8080` API server:
 
 ```nginx
 server {
-    listen       80;
-    server_name  localhost;
+  listen       80;
+  server_name  localhost;
 
-    location / {
-        proxy_pass http://localhost:4000;
-    }
+  # Reverse proxy all traffic to the Angular app
+  location / {
+    proxy_pass http://localhost:4000;
+  }
 
-    location /api {
-      proxy_pass http://myinternalhost:8080;
-    }
+  # Reverse proxy all traffic starting with `/api` to the backend API server
+  location /api {
+    proxy_pass http://myinternalhost:8080;
+  }
 }
 ```
 
@@ -171,7 +173,9 @@ export PROXY_CONFIG;
 
 From there it's just a matter of making a call to this `/config` endpoint just like any other endpoint.
 
-TODO: Sample code to grab config values
+```typescript
+this.httpClient.get('/config');
+```
 
 You can start your development server with an environment variable like so `DEBOUNCE_TIME=300 npm start`
 
@@ -190,7 +194,7 @@ app.get('/configapi', (req, res) => {
 });
 ```
 
-If you're using server side rendering, when the code is executing on the server you won't necessarily need to call this API (though you could) since you can just directly access the environment variables from within code. However, to keep things simple, it's probably best to hide how all of your configuration values are retreived behind a single "Config" Angular service.
+During server side rendering, when the code is executing on the server you won't necessarily need to call this API (though you could) since you can just directly access the environment variables from within code. However, to keep things simple, it's probably best to hide how all of your configuration values are retreived behind a single "Config" Angular service.
 
 TODO: Example config service
 
