@@ -12,6 +12,7 @@ export class ServerTimeService {
 
   getTime(): Observable<string> {
 
+    // Calls relative path `/api`. No host in the URL here.
     return this.httpClient.get('/api/servertime')
       .pipe(map((data: any) => data.servertime));
   }
