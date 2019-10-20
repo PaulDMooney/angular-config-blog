@@ -34,7 +34,7 @@ Let's look at the scenario where your backend API server sits at `http://myinter
 
 When a project is generated using Angular CLI it uses [webpack](https://webpack.js.org/) (at least at the time of writing this) which includes a [dev server](https://webpack.js.org/configuration/dev-server/) that hosts the app and watches for changes when we run `ng serve` (or `npm start` if you're using the Angular CLI defaults). This server also includes a reverse proxy which can be configured via proxy.conf.js or proxy.conf.json file. You can read more about it in the [Angular CLI repo](https://github.com/angular/angular-cli/blob/master/docs/documentation/stories/proxy.md). I prefer the 'js' version of the file since it gives us more flexibility.
 
-Given our example scenario for getting requests from the relative path `/api` to the absolute path `http://myinternalhost:8080/api`, we can setup our proxy.conf.js in the root of out project folder like so:
+Given our example scenario for getting requests from the relative path `/api` to the absolute path `http://myinternalhost:8080/api`, we can setup our `proxy.conf.js` in the root of out project folder like so:
 
 ```javascript
 const PROXY_CONFIG = {
@@ -70,7 +70,7 @@ const PROXY_CONFIG = {
 module.exports = PROXY_CONFIG;
 ```
 
-The environment variable can be passed via commandline `API_SERVER=http://myinternalhost:8080 npm start`
+The environment variable can be passed via commandline `API_SERVER=http://myinternalhost:8080 npm start`.
 
 ### Reverse Proxy when Deployed
 
@@ -88,11 +88,33 @@ TODO: Example configuration
 
 In server side rendering (SSR), your Angular app's code is running on the server similar to how it would run in the browser, complete with the API calls it needs to make but with a few exceptions. One of those exceptions is that relative URLs are meaningless on the server, servers want absolute URLs. So it turns out that our app *does* need that absolute URL to the backend API server afterall.
 
-Luckily, when rendering on the server, we're not in a context where we need to worry about CORS, and we are in a context where your code can read environment variables. So our example HttpClient request can be altered to look like this:
+Luckily, when rendering on the server, we're *not* in a context where we need to worry about CORS, and we *are* in a context where your code can read environment variables. So our example HttpClient request can be altered to look like this:
 
-TODO: Updated example HttpClient call
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class ServerTimeService {
+
+  constructor(private httpClient: HttpClient, @Inject(PLATFORM_ID) private platformId) { }
+
+  getTime(): Observable<string> {
+
+    const path = '/api/servertime';
+
+    // Make URL absolute only if on the server
+    const url = isPlatformServer(this.platformId) ? process.env.API_SERVER + path : path;
+
+    return this.httpClient.get(url)
+      .pipe(map((data: any) => data.servertime));
+  }
+}
+```
 
 This doesn't mean we can ditch the reverse proxy setup, we still need that when the app is running in the browser. This is just an extra consideration to make when leveraging SSR.
+
+**Note:**
+For this to compile, you will also need to install node types via `npm i -D @types/node` and then add `"node"` to the `compilerOptions.types` array of the the `tsconfig.app.json` file.
 
 ## Environment Variables vs Environment.ts
 

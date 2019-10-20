@@ -1,0 +1,11 @@
+version: '3.7'
+services:
+  web:
+    # image: 'nginx:1.17.4-alpine'
+    build:
+      context: .
+    ports:
+      - '8080:80'
+    environment:
+      API_SERVER: '${NGINX_API_SERVER}'
+      APP_SERVER: '${APP_SERVER}'
