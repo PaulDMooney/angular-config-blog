@@ -82,7 +82,22 @@ TODO: Possible image here?
 
 Here's a snippet of nginx configuration that forwards traffic to your app, and to our `http://myinternalhost:8080` API server:
 
-TODO: Example configuration
+```nginx
+server {
+    listen       80;
+    server_name  localhost;
+
+    location / {
+        proxy_pass http://localhost:4000;
+    }
+
+    location /api {
+      proxy_pass http://myinternalhost:8080;
+    }
+}
+```
+
+NGINX itself can be configured to use environment variables as mentioned on its [Docker Hub page](https://hub.docker.com/_/nginx).
 
 ### What about Server Side Rendering?
 
