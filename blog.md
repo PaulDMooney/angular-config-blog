@@ -6,7 +6,7 @@ In this post I'm going to talk about some of the best ways to get your configura
 
 Most SPAs need a backend API server, so when development starts there's the question of "how do I tell my app where my API server is?" The answer is that you don't. Your app should assume the API server is served from the same host as the app itself. It will only use relative URLs (in this case "relative" means no protocol, host, or port specified) to call the API server.
 
-For example: TODO: Is this too much? Should just show the httpClient line?
+For example:
 ```typescript
 @Injectable({
   providedIn: 'root'
@@ -229,18 +229,20 @@ There are different situations where you may need to call a configuration API in
 
 ### On Demand, maybe leveraging a behaviour subject
 
-This is like the title says, call it only when you need. This is ideal when you require configuration values for some of the views or components you're developing.
+This is like the title says, call it only when you need. This is ideal when you require configuration values for some of the views or components you're developing. You can call the config API from one of the [lifecycle hooks](https://angular.io/guide/lifecycle-hooks) of your components.
 
-Perhaps use something like a [Replay Subject](https://rxjs-dev.firebaseapp.com/api/index/class/ReplaySubject) to prevent multiple or competing calls going to the backend and to cache your config values.
+Perhaps use something like a [Replay Subject](https://rxjs-dev.firebaseapp.com/api/index/class/ReplaySubject) to prevent multiple or competing calls going to the config API at once and to cache your config values.
 
 ### From the Angular APP_INITIALIZER hook
 
-An APP_INITIALIZER function gets called during Angular's startup. This is likely the place you want to execute your config retrieval if some of those configurations are central to the app. Like say, if they relate to how you might configure a global aspect of the app such as internationalization or if you prefer the app to fail fast when there is an invalid configuration instead of finding out later when the config is finally used.
+An APP_INITIALIZER function gets called during Angular's startup. This is likely the place you want to execute your config retrieval if some of those configurations are central to the app. Like say, if they relate to how you might configure a global aspect of the app such as internationalization, possibly affect some change in routing, or if you prefer the app to fail fast when there is an invalid configuration instead of finding out later when the config value is finally used.
 
 You can read more about the [APP_INITIALIZER](https://www.tektutorialshub.com/angular/angular-how-to-use-app-initializer/).
 
+Again, it's probably good to wrap the config API call in a Replay Subject just so that it's results can be cached for later.
+
 ### Before Angular Starts
--- In the main.ts file 
+
 This is the earliest time to retrieve configuration: before anything Angular begins to bootstrap. This is good for situations where you need these values even early than APP_INITIALIZER allows. Examples might be if you need them to configure a custom [HttpInterceptor](https://angular.io/api/common/http/HttpInterceptor) or if you have a special [Error Handler](https://angular.io/api/core/ErrorHandler) that needs an API key to a logging service.
 
 The place to make this call is in the `main.ts` file. On return, store the results in local storage so that they can be retrieved when needed. Note that angular service such as HttpClient won't be available so the browser basics like `fetch` or `XMLHttpRequest` will have to do.
@@ -263,13 +265,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 ```
 
-## .env files
+## .env Files
 
 One last bonus tidbit of information: It can be tedious to setup environment variables in the command line when developing. Especially if there's a lot of them. The answer to this problem is the `.env` file.
 
-It's a simple file where each line is an environment variable assignment in the format `VARIABLE_NAME=value`.
+It's a simple file where each line is an environment variable assignment in the format `VARIABLE_NAME=value`. *And* it supports comments!
 
-The `.env` file works out of the box in some environments, like for docker-compose, but doesn't work out of the box in node.js. You'll need to install the library [dotenv](https://www.npmjs.com/package/dotenv) as a dev dependency: `npm i -D dotenv` and then have it loaded up.
+The `.env` file works out of the box in some runtimes, like for docker-compose, but doesn't work out of the box in node.js. You'll need to install the library [dotenv](https://www.npmjs.com/package/dotenv) as a dev dependency: `npm i -D dotenv` and then have it loaded up.
 
 To load it in your `proxy.conf.js`, just add the following line to the top of the file.
 ```javascript
@@ -282,3 +284,21 @@ To load it for SSR, alter the npm script called "serve:ssr" to the following:
 ```
 
 Finally be sure `.env` file entry is added to your `.gitignore` file. This file is for your local development, it would be really annoying if your settings were regularly and unexpectedly clobbered by someone else's changes whenever you're pulling the latest.
+
+## Wrapping up
+
+To summarize what we've learned here about getting configuration to your Angular app:
+
+1. Use a reverse-proxy to "host" your Angular app and Backend APIs from the same server, don't try to configure where that backend API is in your Angular app.
+
+1. You may have very frontend specific configurations that aren't appropriate to serve from your existing business oriented backend APIs. If so, create a simple config API by hijacking your webpack dev-server during development, and by hijacking your server.ts file if your're using SSR.
+
+1. Environment Variables are a good medium to set config values from the server side.
+
+1. You probably won't need `Environment.ts` files as much as you think.
+
+1. There are various times to call your config API. Pick one.
+
+1. Don't forget the `.env` files
+
+Hope this was a good read. Not all of it will be appropriate for your project, but I'm sure some of it will be.
