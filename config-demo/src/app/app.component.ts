@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ServerTimeService } from './server-time.service';
+import { ConfigService } from './config.service';
 
 @Component({
   selector: 'app-root',
@@ -12,13 +13,19 @@ export class AppComponent implements OnInit {
 
   serverTime: string;
 
-  constructor(private serverTimeService: ServerTimeService) {}
+  configValues: string;
+
+  constructor(private serverTimeService: ServerTimeService, private configService: ConfigService) {}
 
   ngOnInit(): void {
 
     // Would be good to unsubscribe on destroy, but let's keep this simple.
     this.serverTimeService.getTime().subscribe(result => {
       this.serverTime = result;
+    });
+
+    this.configService.getConfig().subscribe(result => {
+      this.configValues = JSON.stringify(result);
     });
   }
 }

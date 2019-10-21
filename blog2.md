@@ -141,9 +141,9 @@ It'd be tempting to use the `Environment.ts` and `Environment.prod.ts` as the co
 
 In general you probably won't use the `Environment.ts` files much unless there are different modes your application needs to be built in. If you find yourself writing `Environment.staging.ts` or `Environment.qa.ts` files, you're doing it wrong.
 
-So how do you configure this 'debounce' time in the app? With Environment Variables! How do we use environment variables in an app that runs in the browser? Serve them via bankend API.
+So how do you configure this 'debounce' time in the app? With Environment Variables! How do we use environment variables in an app that mostly runs in the browser? Serve them via bankend API.
 
-There's multiple ways to do this. We'll take the approach that we're using a purpose built "Config" REST endpoint just for this Angular app.
+There are multiple ways to do this. We'll take the approach that we're using a purpose built "Config" REST endpoint just for this Angular app.
 
 ### Sending environment variables during Development
 
@@ -186,7 +186,7 @@ If you're leveraging server side rendering, you'll probably have a `server.ts` f
 Add the following to the `server.ts` file used for SSR:
 
 ```javascript
-app.get('/configapi', (req, res) => {
+app.get('/config', (req, res) => {
   res.status(200).send({
     DEBOUNCE_TIME: process.env.DEBOUNCE_TIME || 500 // Read from environment or default to 500
     ... // Other config values here
@@ -196,7 +196,28 @@ app.get('/configapi', (req, res) => {
 
 During server side rendering, when the code is executing on the server you won't necessarily need to call this API (though you could) since you can just directly access the environment variables from within code. However, to keep things simple, it's probably best to hide how all of your configuration values are retreived behind a single "Config" Angular service.
 
-TODO: Example config service
+```typescript
+@Injectable({
+  providedIn: 'root'
+})
+export class ConfigService {
+
+  constructor(private httpClient: HttpClient, @Inject(PLATFORM_ID) private platformId) {}
+
+  getConfig(): Observable<any> {
+
+    // Direct access to environment variables when on server.
+    if (isPlatformServer(this.platformId)) {
+      return of({
+        DEBOUNCE_TIME: process.env.DEBOUNCE_TIME
+      });
+    }
+
+    // Otherwise call the `/config` API.
+    return this.httpClient.get('/config');
+  }
+}
+```
 
 #### Avoid Depending on Transferstate to Transport your Configuration
 
