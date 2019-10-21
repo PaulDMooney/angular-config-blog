@@ -8,7 +8,13 @@ if (environment.production) {
   enableProdMode();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+document.addEventListener('DOMContentLoaded', async () => {
+
+  const response = await fetch('/config');
+  if (response.status === 200) {
+    const result = await response.text();
+    localStorage.setItem('config', result);
+    platformBrowserDynamic().bootstrapModule(AppModule)
+    .catch(err => console.error(err));
+  }
 });

@@ -225,13 +225,43 @@ When using server side rendering, It may be tempting to avoid setting up a "Conf
 
 ## The right time to call your Configuration API endpoint
 
+There are different situations where you may need to call a configuration API in the lifecycle of your app. The earlier it's called the better, but it can also get more complex. These are some of the places where you could call the config API from:
+
 ### On Demand, maybe leveraging a behaviour subject
-TODO
+
+This is like the title says, call it only when you need. This is ideal when you require configuration values for some of the views or components you're developing.
+
+Perhaps use something like a [Replay Subject](https://rxjs-dev.firebaseapp.com/api/index/class/ReplaySubject) to prevent multiple or competing calls going to the backend and to cache your config values.
+
 ### From the Angular APP_INITIALIZER hook
-TODO
+
+An APP_INITIALIZER function gets called during Angular's startup. This is likely the place you want to execute your config retrieval if some of those configurations are central to the app. Like say, if they relate to how you might configure a global aspect of the app such as internationalization or if you prefer the app to fail fast when there is an invalid configuration instead of finding out later when the config is finally used.
+
+You can read more about the [APP_INITIALIZER](https://www.tektutorialshub.com/angular/angular-how-to-use-app-initializer/).
+
 ### Before Angular Starts
 -- In the main.ts file 
-TODO
+This is the earliest time to retrieve configuration: before anything Angular begins to bootstrap. This is good for situations where you need these values even early than APP_INITIALIZER allows. Examples might be if you need them to configure a custom [HttpInterceptor](https://angular.io/api/common/http/HttpInterceptor) or if you have a special [Error Handler](https://angular.io/api/core/ErrorHandler) that needs an API key to a logging service.
+
+The place to make this call is in the `main.ts` file. On return, store the results in local storage so that they can be retrieved when needed. Note that angular service such as HttpClient won't be available so the browser basics like `fetch` or `XMLHttpRequest` will have to do.
+
+Example `main.ts` file:
+```typescript
+if (environment.production) {
+  enableProdMode();
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+  const response = await fetch('/config');
+  if (response.status === 200) {
+    const result = await response.text();
+    localStorage.setItem('config', result);
+    platformBrowserDynamic().bootstrapModule(AppModule)
+    .catch(err => console.error(err));
+  }
+});
+```
 
 ## .env files
 
