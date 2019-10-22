@@ -302,3 +302,5 @@ To summarize what we've learned here about getting configuration to your Angular
 1. Don't forget the `.env` files
 
 Hope this was a good read. Not all of it will be appropriate for your project, but I'm sure some of it will be.
+
+Sample project source, and this blog in the works, can be found [here](https://github.com/PaulDMooney/angular-config-blog)
