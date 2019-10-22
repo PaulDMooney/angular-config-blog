@@ -1,6 +1,6 @@
 # Good Practices for Configuring your Angular App
 
-In this post I'm going to talk about some of the best ways to get your configurations to your Angular app. Just note, this isn't a post about Angular framework level configurations, this about how the features you're developing receive your configurable values.
+In this post I'm going to talk about some of the best ways to get your configurations to your Angular app. Just note, this isn't a post about Angular framework level configurations, this is about how the features you're developing receive your configurable values.
 
 ## Where's my Backend API Server?
 
@@ -34,7 +34,7 @@ Let's look at the scenario where your backend API server sits at `http://myinter
 
 When a project is generated using Angular CLI it uses [webpack](https://webpack.js.org/) (at least at the time of writing this) which includes a [dev server](https://webpack.js.org/configuration/dev-server/) that hosts the app and watches for changes when we run `ng serve` (or `npm start` if you're using the Angular CLI defaults). This server also includes a reverse proxy which can be configured via `proxy.conf.js` or `proxy.conf.json` file. You can read more about it in the [Angular CLI repo](https://github.com/angular/angular-cli/blob/master/docs/documentation/stories/proxy.md). I prefer the 'js' version of the file since it gives us more flexibility.
 
-Given our example scenario for getting requests from the relative path `/api` to the absolute path `http://myinternalhost:8080/api`, we can setup our `proxy.conf.js` in the root of out project folder like so:
+Given our example scenario for getting requests from the relative path `/api` to the absolute path `http://myinternalhost:8080/api`, we can setup our `proxy.conf.js` in the root of our project folder like so:
 
 ```javascript
 const PROXY_CONFIG = {
@@ -78,7 +78,7 @@ When you're deploying your application, you won't have webpack's dev-server to u
 
 The key idea here is that the reverse proxy is the single point for traffic to and from the browser for both requests to your app, and requests to the API server.
 
-![Reverse Proxy Layout](./figures/reverse_proxy_diagram.png)
+![Reverse Proxy Layout](https://thepracticaldev.s3.amazonaws.com/i/h1e0unghrqvyp1v4jrwo.png)
 
 Here's a snippet of nginx configuration that forwards traffic to your app, and to our `http://myinternalhost:8080` API server:
 
@@ -243,7 +243,7 @@ Again, it's probably good to wrap the config API call in a Replay Subject just s
 
 ### Before Angular Starts
 
-This is the earliest time to retrieve configuration: before anything Angular begins to bootstrap. This is good for situations where you need these values even early than APP_INITIALIZER allows. Examples might be if you need them to configure a custom [HttpInterceptor](https://angular.io/api/common/http/HttpInterceptor) or if you have a special [Error Handler](https://angular.io/api/core/ErrorHandler) that needs an API key to a logging service.
+This is the earliest time to retrieve configuration: before anything Angular begins to bootstrap. This is good for situations where you need these values even earlier than APP_INITIALIZER allows. Examples might be if you need them to configure a custom [HttpInterceptor](https://angular.io/api/common/http/HttpInterceptor) or if you have a special [Error Handler](https://angular.io/api/core/ErrorHandler) that needs an API key to a logging service.
 
 The place to make this call is in the `main.ts` file. On return, store the results in local storage so that they can be retrieved when needed. Note that angular service such as HttpClient won't be available so the browser basics like `fetch` or `XMLHttpRequest` will have to do.
 
